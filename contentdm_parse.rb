@@ -1,31 +1,41 @@
 require 'csv'
 require 'fileutils'
+require 'optparse'
 
-InputCSV = ARGV[0]
-InputDIR = ARGV[1]
-DesinationDIR = ARGV[2]
-if ! File.exists?("#{DesinationDIR}/objects")
-  Dir.mkdir "#{DesinationDIR}/objects"
+
+$inputTSV = ''
+$inputDIR = ''
+$desinationDIR = ''
+
+ARGV.options do |opts|
+  opts.on("-t", "--tsv=val", String)   { |val| $inputTSV = val }
+  opts.on("-d", "--directory=val", String)  { |val| $inputDIR = val }
+  opts.on("-o", "--output=val", String)     { |val| $desinationDIR = val }
+  opts.parse!
 end
-if ! File.exists?("#{DesinationDIR}/metadata")
-  Dir.mkdir "#{DesinationDIR}/metadata"
+    
+if ! File.exists?("#{$desinationDIR}/objects")
+  Dir.mkdir "#{$desinationDIR}/objects"
 end
-CSV.open("#{DesinationDIR}/metadata/metadata.csv", "wb") do |csv|
-  CSV.foreach(InputCSV,col_sep: "\t", quote_char: "ア",headers: true) do |row|
+if ! File.exists?("#{$desinationDIR}/metadata")
+  Dir.mkdir "#{$desinationDIR}/metadata"
+end
+CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
+  CSV.foreach($inputTSV,col_sep: "\t", quote_char: "ア",headers: true) do |row|
     if ! row['Identifier'].nil?
       id = File.basename(row['Identifier'])
-      id_path = Dir.glob("#{InputDIR}/**/#{id}.*")
+      id_path = Dir.glob("#{$inputDIR}/**/#{id}.*")
       if ! id_path.empty?
         filesearch = id_path
         filesearch.each do |file|
-          if ! File.exist? "#{DesinationDIR}/objects" + '/' + File.basename(file)
+          if ! File.exist? "#{$desinationDIR}/objects" + '/' + File.basename(file)
             puts "Copying: #{id_path}"
-            FileUtils.cp file, "#{DesinationDIR}/objects" + '/' + File.basename(file)
+            FileUtils.cp file, "#{$desinationDIR}/objects" + '/' + File.basename(file)
           end
         end
       else
         filesearch = 'Path not found'
-        open("#{DesinationDIR}/missing_file_list.txt", 'a') do |missing|
+        open("#{$desinationDIR}/missing_file_list.txt", 'a') do |missing|
           missing << "#{File.basename(row['Identifier'])}.\n"
         end
       end
