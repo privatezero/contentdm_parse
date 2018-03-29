@@ -31,16 +31,17 @@ CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
           if ! File.exist? "#{$desinationDIR}/objects" + '/' + File.basename(file)
             puts "Copying: #{id_path}"
             FileUtils.cp file, "#{$desinationDIR}/objects" + '/' + File.basename(file)
+            row ["filename"] = "objects/#{File.basename(file)}"
           end
         end
       else
         filesearch = 'Path not found'
         open("#{$desinationDIR}/missing_file_list.txt", 'a') do |missing|
           missing << "#{File.basename(row['Identifier'])}.\n"
+          row ["filename"] = "FILE NOT FOUND"
         end
       end
     end
-    row ["filename"] = filesearch
     if $. == 2
       output_headers = Array.new
       row.headers.each do |original_header|
