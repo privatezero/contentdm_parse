@@ -43,7 +43,7 @@ CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
       end
     end
     if $. == 2
-      output_headers = Array.new
+      @output_headers = Array.new
       row.headers.each do |original_header|
         if original_header == 'Title'
           finalheader = 'dc.title'
@@ -74,10 +74,21 @@ CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
         else
           finalheader = original_header
         end
-        output_headers << finalheader
+        @output_headers << finalheader
       end
-      csv << output_headers
+      # Swap last column to first
+      header_new_order = []
+      header_new_order << @output_headers.last
+      @output_headers[0...-1].each do |header|
+        header_new_order << header
+      end
+      csv << header_new_order
     end
-  csv << row
-  end
+    row_new_order = []
+    row_new_order << row["#{@output_headers.last}"]
+    row.headers[0...-1].each do |content|
+      row_new_order << row["#{content}"]
+    end
+    csv << row_new_order
+end
 end
