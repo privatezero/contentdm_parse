@@ -41,6 +41,7 @@ CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
             md5_original = Digest::MD5.file(original_file)
             md5_package = Digest::MD5.file(package_file)
             if md5_original == md5_package
+              puts "Fixity of #{package_file} validated"
               row ["filename"] = "objects/#{File.basename(original_file)}"
             else
               abort "Critical Error: MD5 mismatch with source and #{package_file}  Exiting"
