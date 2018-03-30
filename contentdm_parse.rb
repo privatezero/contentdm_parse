@@ -1,6 +1,7 @@
 require 'csv'
 require 'fileutils'
 require 'optparse'
+require 'digest'
 
 
 $inputTSV = ''
@@ -31,11 +32,19 @@ CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
       id_path = Dir.glob("#{$inputDIR}/**/#{id}.*")
       if ! id_path.empty?
         filesearch = id_path
-        filesearch.each do |file|
-          if ! File.exist? "#{$desinationDIR}/objects" + '/' + File.basename(file)
+        filesearch.each do |original_file|
+          package_file = "#{$desinationDIR}/objects" + '/' + File.basename(original_file)
+          if ! File.exist? package_file
             puts "Copying: #{id_path}"
-            FileUtils.cp file, "#{$desinationDIR}/objects" + '/' + File.basename(file)
-            row ["filename"] = "objects/#{File.basename(file)}"
+            FileUtils.cp original_file, package_file
+            # Verify fixity integrity of copied files
+            md5_original = Digest::MD5.file(original_file)
+            md5_package = Digest::MD5.file(package_file)
+            if md5_original == md5_package
+              row ["filename"] = "objects/#{File.basename(original_file)}"
+            else
+              abort "Critical Error: MD5 mismatch with source and #{package_file}  Exiting"
+            end
           end
         end
       else
