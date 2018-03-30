@@ -14,15 +14,19 @@ ARGV.options do |opts|
   opts.parse!
 end
     
+# Create Archivematica transfer structure
 if ! File.exists?("#{$desinationDIR}/objects")
   Dir.mkdir "#{$desinationDIR}/objects"
 end
 if ! File.exists?("#{$desinationDIR}/metadata")
   Dir.mkdir "#{$desinationDIR}/metadata"
 end
+
+# Parse CONTENTdm CSV
 CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
   CSV.foreach($inputTSV,col_sep: "\t", quote_char: "ア",headers: true) do |row|
     if ! row['Identifier'].nil?
+      # If found, copy files to transfer package and add relative path to CSV
       id = File.basename(row['Identifier'])
       id_path = Dir.glob("#{$inputDIR}/**/#{id}.*")
       if ! id_path.empty?
@@ -35,6 +39,7 @@ CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
           end
         end
       else
+        # If not found, note in CSV and add to missing files log
         filesearch = 'Path not found'
         open("#{$desinationDIR}/missing_file_list.txt", 'a') do |missing|
           missing << "#{File.basename(row['Identifier'])}.\n"
@@ -43,6 +48,7 @@ CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
       end
     end
     if $. == 2
+      # Parse CONTENTdm DC export headers into Archivematica DC ingest format
       @output_headers = Array.new
       row.headers.each do |original_header|
         if original_header == 'Title'
@@ -76,7 +82,7 @@ CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
         end
         @output_headers << finalheader
       end
-      # Swap last column to first
+      # Swap file location column to first position (Archivematica ingest rule)
       header_new_order = []
       header_new_order << @output_headers.last
       @output_headers[0...-1].each do |header|
