@@ -106,5 +106,5 @@ CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
       row_new_order << row["#{content}"]
     end
     csv << row_new_order
-end
+  end
 end
