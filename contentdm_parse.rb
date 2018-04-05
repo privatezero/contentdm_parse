@@ -83,7 +83,7 @@ CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
           finalheader = 'dc.publisher'
         elsif original_header == 'Language'
           finalheader = 'dc.language'
-        elsif original_header == 'coverage'
+        elsif original_header == 'Coverage'
           finalheader = 'dc.coverage'
         elsif original_header == 'Format'
           finalheader = 'dc.format'
