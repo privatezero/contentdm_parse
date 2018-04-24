@@ -14,6 +14,21 @@ ARGV.options do |opts|
   opts.on("-o", "--output=val", String)     { |val| $desinationDIR = val }
   opts.parse!
 end
+
+class String
+  # colorization
+  def colorize(color_code)
+    "\e[#{color_code}m#{self}\e[0m"
+  end
+
+  def red
+    colorize(31)
+  end
+
+  def green
+    colorize(32)
+  end
+end
     
 # Create Archivematica transfer structure
 if ! File.exists?("#{$desinationDIR}/objects")
@@ -41,7 +56,7 @@ CSV.open("#{$desinationDIR}/metadata/metadata.csv", "wb") do |csv|
             md5_original = Digest::MD5.file(original_file)
             md5_package = Digest::MD5.file(package_file)
             if md5_original == md5_package
-              puts "Fixity of #{package_file} validated"
+              puts "Fixity of #{package_file} validated".green
               row ["filename"] = "objects/#{File.basename(original_file)}"
             else
               abort "Critical Error: MD5 mismatch with source and #{package_file}  Exiting"
